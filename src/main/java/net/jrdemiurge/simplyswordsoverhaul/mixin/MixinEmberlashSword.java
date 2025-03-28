@@ -41,7 +41,11 @@ public abstract class MixinEmberlashSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableEmberlashChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
+
             int maxEffectLevel = Config.emberlashMaxSmoulderLevel - 2;
             float smoulderDamage = (float) Config.emberlashSmoulderDamageMultiplier;
 
@@ -93,7 +97,11 @@ public abstract class MixinEmberlashSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableEmberlashChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
+
             int cooldown = Config.emberlashCooldownTicks;
             float healPercentage = (float) Config.emberlashHealPercentage / 100F;
             double scale = Config.emberlashDashDistance / 3D;
@@ -177,6 +185,10 @@ public abstract class MixinEmberlashSword {
     @OnlyIn(Dist.CLIENT)
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableEmberlashChanges){
+            return;
+        }
+
         ci.cancel();
 
         int cooldown = Config.emberlashCooldownTicks;

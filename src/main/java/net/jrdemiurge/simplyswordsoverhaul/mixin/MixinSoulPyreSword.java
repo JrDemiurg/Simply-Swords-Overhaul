@@ -21,6 +21,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.item.custom.SoulPyreSwordItem;
+import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +38,9 @@ public abstract class MixinSoulPyreSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableSoulPyreChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
             int witherDuration = Config.soulPyreWitherDuration;
             int witherLevel = Config.soulPyreWitherLevel;
@@ -64,6 +68,9 @@ public abstract class MixinSoulPyreSword {
 
     @Inject(method = "inventoryTick", at = @At("HEAD"), cancellable = true)
     private void modifyInventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected, CallbackInfo ci) {
+        if (!Config.enableSoulPyreChanges){
+            return;
+        }
 
         if (stepMod > 0) {
             --stepMod;
@@ -81,6 +88,9 @@ public abstract class MixinSoulPyreSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableSoulPyreChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
             ItemStack offHandItem = user.getItemInHand(InteractionHand.OFF_HAND);
             boolean isMainHandUse = hand == InteractionHand.MAIN_HAND;
@@ -104,6 +114,7 @@ public abstract class MixinSoulPyreSword {
                 Vec3 teleportPos = user.position().add(horizontalLookVec);
                 if (world.getBlockState(BlockPos.containing(teleportPos)).getCollisionShape(world, BlockPos.containing(teleportPos)).isEmpty()) {
                     target.teleportTo(teleportPos.x, teleportPos.y, teleportPos.z);
+                    world.playSound(null, user, SoundRegistry.ELEMENTAL_SWORD_SCIFI_ATTACK_01.get(), user.getSoundSource(), 0.3F, 1.0F);
                     user.getCooldowns().addCooldown((SoulPyreSwordItem) (Object) this, cooldown);
                 } else {
                     user.getCooldowns().addCooldown((SoulPyreSwordItem) (Object) this, 5);
@@ -117,6 +128,9 @@ public abstract class MixinSoulPyreSword {
 
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableSoulPyreChanges){
+            return;
+        }
         ci.cancel();
 
         int witherDuration = Config.soulPyreWitherDuration;

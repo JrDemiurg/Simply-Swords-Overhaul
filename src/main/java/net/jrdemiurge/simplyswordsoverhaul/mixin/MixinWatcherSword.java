@@ -25,6 +25,9 @@ public abstract class MixinWatcherSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableWatcherChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
             double hitHealAmount = Config.watcherHitHealAmount;
             double killHealPercent = Config.watcherKillHealPercent;
@@ -61,6 +64,9 @@ public abstract class MixinWatcherSword {
 
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableWatcherChanges){
+            return;
+        }
         ci.cancel();
 
         double hitHealAmount = Config.watcherHitHealAmount;

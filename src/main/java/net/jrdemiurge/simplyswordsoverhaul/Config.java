@@ -9,6 +9,42 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 public class Config {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    private static final ForgeConfigSpec.BooleanValue ENABLE_EMBERLASH_CHANGES = BUILDER
+            .comment("Emberlash: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableEmberlashChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_MOLTEN_EDGE_CHANGES = BUILDER
+            .comment("Molten Edge: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableMoltenEdgeChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_SHADOWSTING_CHANGES = BUILDER
+            .comment("Shadowsting: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableShadowstingChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_SOUL_PYRE_CHANGES = BUILDER
+            .comment("Soul Pyre: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableSoulPyreChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_SOULRENDER_CHANGES = BUILDER
+            .comment("Soulrender: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableSoulrenderChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_STARS_EDGE_CHANGES = BUILDER
+            .comment("Star's Edge: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableStarsEdgeChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_STORMS_EDGE_CHANGES = BUILDER
+            .comment("Storm's Edge: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableStormsEdgeChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_WATCHER_CHANGES = BUILDER
+            .comment("Watcher: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableWatcherChanges", true);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_WHISPERWIND_CHANGES = BUILDER
+            .comment("Whisperwind: Toggle changes made by the mod (true = changes enabled, false = disabled)")
+            .define("enableWhisperwindChanges", true);
+
     private static final ForgeConfigSpec.DoubleValue EMBERLASH_SMOULDER_DAMAGE_MULTIPLIER = BUILDER
             .comment("Emberlash: Bonus damage dealt per stack of Smouldering (default: 0.75)")
             .defineInRange("emberlashSmoulderDamageMultiplier", 0.75, 0.0, 10.0);
@@ -179,6 +215,15 @@ public class Config {
 
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 
+    public static boolean enableEmberlashChanges;
+    public static boolean enableMoltenEdgeChanges;
+    public static boolean enableShadowstingChanges;
+    public static boolean enableSoulPyreChanges;
+    public static boolean enableSoulrenderChanges;
+    public static boolean enableStarsEdgeChanges;
+    public static boolean enableStormsEdgeChanges;
+    public static boolean enableWatcherChanges;
+    public static boolean enableWhisperwindChanges;
     public static double emberlashSmoulderDamageMultiplier;
     public static int emberlashDashDistance;
     public static int emberlashHealPercentage;
@@ -225,6 +270,15 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+        enableEmberlashChanges = ENABLE_EMBERLASH_CHANGES.get();
+        enableMoltenEdgeChanges = ENABLE_MOLTEN_EDGE_CHANGES.get();
+        enableShadowstingChanges = ENABLE_SHADOWSTING_CHANGES.get();
+        enableSoulPyreChanges = ENABLE_SOUL_PYRE_CHANGES.get();
+        enableSoulrenderChanges = ENABLE_SOULRENDER_CHANGES.get();
+        enableStarsEdgeChanges = ENABLE_STARS_EDGE_CHANGES.get();
+        enableStormsEdgeChanges = ENABLE_STORMS_EDGE_CHANGES.get();
+        enableWatcherChanges = ENABLE_WATCHER_CHANGES.get();
+        enableWhisperwindChanges = ENABLE_WHISPERWIND_CHANGES.get();
         emberlashSmoulderDamageMultiplier = EMBERLASH_SMOULDER_DAMAGE_MULTIPLIER.get();
         emberlashDashDistance = EMBERLASH_DASH_DISTANCE.get();
         emberlashHealPercentage = EMBERLASH_HEAL_PERCENTAGE.get();

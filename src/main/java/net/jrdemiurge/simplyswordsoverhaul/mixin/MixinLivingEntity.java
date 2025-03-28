@@ -16,7 +16,7 @@ public abstract class MixinLivingEntity {
     @Inject(method = "hurt", at = @At("HEAD"))
     private void modifyHurtEnemy(DamageSource pSource, float pAmount, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity target = (LivingEntity) (Object) this;
-        Entity attacker = pSource.getEntity(); // Получаем атакующего
+        Entity attacker = pSource.getEntity();
 
         if (attacker instanceof LivingEntity livingAttacker) {
             boolean hasShadowsting =

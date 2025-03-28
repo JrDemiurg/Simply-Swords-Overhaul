@@ -42,6 +42,9 @@ public abstract class MixinStarsEdgeSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableStarsEdgeChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
 
             float magicDamage = (float) Config.starsEdgeMagicDamage;
@@ -70,6 +73,9 @@ public abstract class MixinStarsEdgeSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableStarsEdgeChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
             UUID playerId = user.getUUID();
 
@@ -139,6 +145,9 @@ public abstract class MixinStarsEdgeSword {
     @OnlyIn(Dist.CLIENT)
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableStarsEdgeChanges){
+            return;
+        }
         ci.cancel();
 
         float magicDamage = (float) Config.starsEdgeMagicDamage;

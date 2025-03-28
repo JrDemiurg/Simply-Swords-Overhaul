@@ -1,5 +1,6 @@
 package net.jrdemiurge.simplyswordsoverhaul.mixin;
 
+import net.jrdemiurge.simplyswordsoverhaul.Config;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.particles.ParticleTypes;
@@ -39,6 +40,9 @@ public abstract class MixinMoltenEdgeSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableMoltenEdgeChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
             ServerLevel world = (ServerLevel)attacker.level();
 
@@ -66,6 +70,9 @@ public abstract class MixinMoltenEdgeSword {
 
     @Inject(method = "inventoryTick", at = @At("HEAD"), cancellable = true)
     private void modifyInventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected, CallbackInfo ci) {
+        if (!Config.enableMoltenEdgeChanges){
+            return;
+        }
         if (!world.isClientSide && entity instanceof Player player) {
             if (player.getItemBySlot(EquipmentSlot.MAINHAND) == stack || player.getItemBySlot(EquipmentSlot.OFFHAND) == stack) {
                 ItemStack mainHandItem = player.getItemInHand(InteractionHand.MAIN_HAND);
@@ -111,6 +118,9 @@ public abstract class MixinMoltenEdgeSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableMoltenEdgeChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
             ItemStack offHandItem = user.getItemInHand(InteractionHand.OFF_HAND);
             boolean isMainHandUse = hand == InteractionHand.MAIN_HAND;
@@ -133,6 +143,9 @@ public abstract class MixinMoltenEdgeSword {
    @OnlyIn(Dist.CLIENT)
    @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+       if (!Config.enableMoltenEdgeChanges){
+           return;
+       }
         ci.cancel();
 
         if (Screen.hasAltDown()){

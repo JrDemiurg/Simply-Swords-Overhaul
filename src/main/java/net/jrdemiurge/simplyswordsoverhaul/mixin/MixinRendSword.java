@@ -36,6 +36,9 @@ public abstract class MixinRendSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableSoulrenderChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
             ServerLevel world = (ServerLevel) attacker.level();
 
@@ -112,6 +115,9 @@ public abstract class MixinRendSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableSoulrenderChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
             ItemStack offHandItem = user.getItemInHand(InteractionHand.OFF_HAND);
             boolean isMainHandUse = hand == InteractionHand.MAIN_HAND;
@@ -191,6 +197,9 @@ public abstract class MixinRendSword {
     @OnlyIn(Dist.CLIENT)
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableSoulrenderChanges){
+            return;
+        }
         ci.cancel();
 
         int baseDamage = Config.soulrenderBaseDamage;

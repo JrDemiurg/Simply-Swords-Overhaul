@@ -40,6 +40,9 @@ public abstract class MixinWhisperwindSword {
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableWhisperwindChanges){
+            return;
+        }
         if (!attacker.level().isClientSide()) {
             if (target.getHealth() == 0.0F) {
                 attacker.level().playSound(null, attacker, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), attacker.getSoundSource(), 0.3F, 1.8F);
@@ -69,6 +72,9 @@ public abstract class MixinWhisperwindSword {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void modifyUseMethod(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!Config.enableWhisperwindChanges){
+            return;
+        }
         if (!user.level().isClientSide()) {
             ItemStack offHandItem = user.getItemInHand(InteractionHand.OFF_HAND);
 
@@ -160,6 +166,9 @@ public abstract class MixinWhisperwindSword {
 
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
+        if (!Config.enableWhisperwindChanges){
+            return;
+        }
         ci.cancel();
 
         int dashDistance = Config.whisperwindDashDistance;
