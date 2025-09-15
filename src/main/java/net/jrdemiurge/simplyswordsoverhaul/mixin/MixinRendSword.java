@@ -10,16 +10,17 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.RendSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -32,7 +33,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(RendSwordItem.class)
-public abstract class MixinRendSword {
+public abstract class MixinRendSword extends UniqueSwordItem {
+
+    public MixinRendSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -53,7 +58,7 @@ public abstract class MixinRendSword {
 
             applyDebuff(target);
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     private void applyDebuff(LivingEntity target) {
@@ -95,22 +100,6 @@ public abstract class MixinRendSword {
                 target.addEffect(new MobEffectInstance(MobEffects.UNLUCK, 500, currentLevel + 1));
             }
         }
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
@@ -191,7 +180,7 @@ public abstract class MixinRendSword {
                 user.heal(Math.min(healAmount, maxHeal));
             }
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     @OnlyIn(Dist.CLIENT)

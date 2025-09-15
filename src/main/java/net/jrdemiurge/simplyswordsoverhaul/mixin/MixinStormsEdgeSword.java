@@ -14,13 +14,13 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.StormsEdgeSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -41,7 +42,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(StormsEdgeSwordItem.class)
-public abstract class MixinStormsEdgeSword {
+public abstract class MixinStormsEdgeSword extends UniqueSwordItem {
+
+    public MixinStormsEdgeSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -55,7 +60,7 @@ public abstract class MixinStormsEdgeSword {
 
             reduceCooldown(player, (StormsEdgeSwordItem) (Object) this, cooldownReduction);
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     private void reduceCooldown(Player player, Item item, int reductionTicks) {
@@ -70,23 +75,6 @@ public abstract class MixinStormsEdgeSword {
         playerData.putInt(cooldownKey, newCooldown);
 
         player.getCooldowns().addCooldown(item, newCooldown);
-
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
@@ -131,6 +119,8 @@ public abstract class MixinStormsEdgeSword {
 
             int dashDuration = 4;
 
+            user.setNoGravity(true);
+
             for (int i = 0; i < dashDuration; i++) {
                 int delay = i * 2;
 
@@ -167,19 +157,17 @@ public abstract class MixinStormsEdgeSword {
                 }, delay, 0);
             }
 
-            Scheduler.schedule(() -> {
-                user.setDeltaMovement(Vec3.ZERO);
-                ((ServerPlayer) user).connection.send(new ClientboundSetEntityMotionPacket(user));
-            }, dashDuration * 2, 0);
-
             boolean[] shouldDisableGravity = {false};
 
             Scheduler.schedule(() -> {
+                user.setDeltaMovement(Vec3.ZERO);
                 if (!user.onGround()) {
-                    user.setNoGravity(true);
                     shouldDisableGravity[0] = true;
+                } else {
+                    user.setNoGravity(false);
                     user.hurtMarked = true;
                 }
+                ((ServerPlayer) user).connection.send(new ClientboundSetEntityMotionPacket(user));
             }, dashDuration * 2, 0);
 
             Scheduler.schedule(() -> {
@@ -200,7 +188,7 @@ public abstract class MixinStormsEdgeSword {
 
             user.getCooldowns().addCooldown((StormsEdgeSwordItem) (Object) this, cooldown);
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     private static float calculateDamage(Player player, Entity target) {

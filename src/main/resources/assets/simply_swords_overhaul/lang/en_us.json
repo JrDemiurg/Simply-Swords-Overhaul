@@ -19,6 +19,7 @@
   "tooltip.simply_swords_overhaul.shadowstingitem_shift_2": "Holding Shift teleports you in the opposite direction.",
   "tooltip.simply_swords_overhaul.solupyreitem": "§6Unique Effect: Soul Tether§r\nOn hit, applies Wither %d for %d seconds.\n \n§2On Right Click:§r\nTeleport a selected target to yourself from up to %d blocks away.",
   "tooltip.simply_swords_overhaul.whisperwinditem": "§6Unique Effect: Fatal Flicker§r\nKilling an enemy resets this ability’s cooldown, including kills from an active ability.\n \n§2On Right Click:§r\nDash forward up to %d blocks, dealing critical attack damage to enemies in your path.",
+  "tooltip.simply_swords_overhaul.whisperwinditem_1": "Using it again during a dash will cancel the dash.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_1": "§6Unique Effect: Storm Jolt§r\nOn hit, reduces cooldown by %d second.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_shift_1": "Includes hits from an active ability.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_2": " \n§2On Right Click:§r\nDash %d blocks in the direction you are looking, dealing normal attack damage to enemies in your path.\n \nYou gain the effects of Haste and Speed.",

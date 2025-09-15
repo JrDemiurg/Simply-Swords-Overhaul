@@ -19,6 +19,7 @@
   "tooltip.simply_swords_overhaul.shadowstingitem_shift_2": "Al mantener presionado Shift, te teletransportas en la dirección opuesta.",
   "tooltip.simply_swords_overhaul.solupyreitem": "§6Efecto Único: Lazo de Alma§r\nAl golpear, aplica Con Marchitamiento %d durante %d segundos.\n \n§2Al hacer clic derecho:§r\nTeletransporta a un objetivo seleccionado hacia ti desde una distancia de hasta %d bloques.",
   "tooltip.simply_swords_overhaul.whisperwinditem": "§6Efecto Único: Parpadeo Mortal§r\nAl matar a un enemigo, se restablece el tiempo de recarga de esta habilidad, incluidas las muertes causadas por una habilidad activa.\n \n§2Al hacer clic derecho:§r\nAvanza rápidamente hasta %d bloques, infligiendo daño crítico a los enemigos en tu camino.",
+  "tooltip.simply_swords_overhaul.whisperwinditem_1": "Usarlo de nuevo durante una embestida la interrumpe.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_1": "§6Efecto Único: Sacudida de Tormenta§r\nAl golpear, reduce el tiempo de recarga en %d segundo.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_shift_1": "Incluye los golpes de una habilidad activa.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_2": " \n§2Al hacer clic derecho:§r\nAvanza %d bloques en la dirección que estás mirando, infligiendo daño normal a los enemigos en tu camino.\n \nObtienes los efectos de Prisa y Velocidad.",

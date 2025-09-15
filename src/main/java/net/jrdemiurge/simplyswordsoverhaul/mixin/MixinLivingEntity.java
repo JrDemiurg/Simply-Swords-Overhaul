@@ -1,5 +1,6 @@
 package net.jrdemiurge.simplyswordsoverhaul.mixin;
 
+import net.jrdemiurge.simplyswordsoverhaul.Config;
 import net.jrdemiurge.simplyswordsoverhaul.util.DamageTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,9 @@ public abstract class MixinLivingEntity {
 
     @Inject(method = "hurt", at = @At("HEAD"))
     private void modifyHurtEnemy(DamageSource pSource, float pAmount, CallbackInfoReturnable<Boolean> cir) {
+        if (!Config.enableShadowstingChanges){
+            return;
+        }
         LivingEntity target = (LivingEntity) (Object) this;
         Entity attacker = pSource.getEntity();
 

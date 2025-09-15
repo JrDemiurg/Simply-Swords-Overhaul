@@ -10,20 +10,22 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.SoulPyreSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -32,9 +34,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(SoulPyreSwordItem.class)
-public abstract class MixinSoulPyreSword {
+public abstract class MixinSoulPyreSword extends UniqueSwordItem {
 
-    private static int stepMod = 0;
+    @Unique
+    private static int simply_Swords_Overhaul_1_20_1$stepMod = 0;
+
+    public MixinSoulPyreSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -47,23 +54,7 @@ public abstract class MixinSoulPyreSword {
 
             target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20*witherDuration, witherLevel - 1));
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     @Inject(method = "inventoryTick", at = @At("HEAD"), cancellable = true)
@@ -72,17 +63,17 @@ public abstract class MixinSoulPyreSword {
             return;
         }
 
-        if (stepMod > 0) {
-            --stepMod;
+        if (simply_Swords_Overhaul_1_20_1$stepMod > 0) {
+            --simply_Swords_Overhaul_1_20_1$stepMod;
         }
 
-        if (stepMod <= 0) {
-            stepMod = 7;
+        if (simply_Swords_Overhaul_1_20_1$stepMod <= 0) {
+            simply_Swords_Overhaul_1_20_1$stepMod = 7;
         }
 
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.MYCELIUM, true);
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, ParticleTypes.SMALL_FLAME, ParticleTypes.SMALL_FLAME, ParticleTypes.MYCELIUM, false);
-        SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 50, 50);
+        HelperMethods.createFootfalls(entity, stack, world, simply_Swords_Overhaul_1_20_1$stepMod, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.SOUL_FIRE_FLAME, ParticleTypes.MYCELIUM, true);
+        HelperMethods.createFootfalls(entity, stack, world, simply_Swords_Overhaul_1_20_1$stepMod, ParticleTypes.SMALL_FLAME, ParticleTypes.SMALL_FLAME, ParticleTypes.MYCELIUM, false);
+        super.inventoryTick(stack, world, entity, slot, selected);
         ci.cancel();
     }
 
@@ -123,7 +114,7 @@ public abstract class MixinSoulPyreSword {
                 user.getCooldowns().addCooldown((SoulPyreSwordItem) (Object) this, 5);
             }
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)

@@ -19,6 +19,7 @@
   "tooltip.simply_swords_overhaul.shadowstingitem_shift_2": "Halte Shift gedrückt, um dich in die entgegengesetzte Richtung zu teleportieren.",
   "tooltip.simply_swords_overhaul.solupyreitem": "§6Einzigartiger Effekt: Seelenbindung§r\nBei einem Treffer wird Wither %d für %d Sekunden angewendet.\n \n§2Rechtsklick:§r\nTeleportiere ein ausgewähltes Ziel aus einer Entfernung von bis zu %d Blöcken zu dir.",
   "tooltip.simply_swords_overhaul.whisperwinditem": "§6Einzigartiger Effekt: Tödliches Flimmern§r\nDas Töten eines Gegners setzt die Abklingzeit dieser Fähigkeit zurück, einschließlich Kills durch eine aktive Fähigkeit.\n \n§2Rechtsklick:§r\nStürme bis zu %d Blöcke nach vorne und füge Gegnern auf deinem Weg kritischen Angriffsschaden zu.",
+  "tooltip.simply_swords_overhaul.whisperwinditem_1": "Eine erneute Nutzung während des Ansturms beendet diesen.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_1": "§6Einzigartiger Effekt: Sturmstoß§r\nBei einem Treffer wird die Abklingzeit um %d Sekunden reduziert.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_shift_1": "Gilt auch für Treffer durch eine aktive Fähigkeit.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_2": " \n§2Rechtsklick:§r\nStürme %d Blöcke in Blickrichtung und füge Gegnern auf deinem Weg normalen Angriffsschaden zu.\n \nDu erhältst die Effekte von Eile und Geschwindigkeit.",

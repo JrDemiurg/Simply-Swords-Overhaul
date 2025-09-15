@@ -13,21 +13,21 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.EmberlashSwordItem;
 import net.sweenus.simplyswords.registry.EffectRegistry;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
-import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,7 +37,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(EmberlashSwordItem.class)
-public abstract class MixinEmberlashSword {
+public abstract class MixinEmberlashSword extends UniqueSwordItem {
+
+    public MixinEmberlashSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -52,8 +56,7 @@ public abstract class MixinEmberlashSword {
             ServerLevel world = (ServerLevel) attacker.level();
             DamageSource damageSource = world.damageSources().generic();
 
-            if (attacker instanceof Player) {
-                Player player = (Player) attacker;
+            if (attacker instanceof Player player) {
                 damageSource = attacker.damageSources().playerAttack(player);
             }
 
@@ -76,23 +79,7 @@ public abstract class MixinEmberlashSword {
                 target.addEffect(new MobEffectInstance(EffectRegistry.SMOULDERING.get(), 20 * 2, 0, false, true));
             }
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
@@ -179,7 +166,7 @@ public abstract class MixinEmberlashSword {
                 user.getPersistentData().putBoolean("EmberlashFirstDashUsed", false);
             }
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     @OnlyIn(Dist.CLIENT)

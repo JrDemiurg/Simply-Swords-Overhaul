@@ -19,6 +19,7 @@
   "tooltip.simply_swords_overhaul.shadowstingitem_shift_2": "Maintenir Shift vous téléporte dans la direction opposée.",
   "tooltip.simply_swords_overhaul.solupyreitem": "§6Effet Unique : Lien d'Âme§r\nEn frappant, applique l'effet Flétrissement %d pendant %d secondes.\n \n§2Clic Droit :§r\nTéléporte une cible sélectionnée vers vous depuis une distance maximale de %d blocs.",
   "tooltip.simply_swords_overhaul.whisperwinditem": "§6Effet Unique : Lueur Fatale§r\nTuer un ennemi réinitialise le temps de recharge de cette capacité, y compris pour les éliminations avec la capacité active.\n \n§2Clic Droit :§r\nEffectuez une charge de %d blocs vers l'avant, infligeant des dégâts critiques aux ennemis sur votre chemin.",
+  "tooltip.simply_swords_overhaul.whisperwinditem_1": "Une nouvelle utilisation pendant une ruée l'interrompt.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_1": "§6Effet Unique : Frappe de Foudre§r\nRéduit le temps de recharge d'une seconde à chaque coup.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_shift_1": "Y compris pour les coups infligés par la capacité active.",
   "tooltip.simply_swords_overhaul.stormsedgeitem_2": " \n§2Clic Droit :§r\nChargez de %d blocs dans la direction où vous regardez, infligeant des dégâts normaux aux ennemis sur votre chemin.\n \nVous obtenez les effets de Hâte et Vitesse.",

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -23,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.ShadowstingSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
@@ -35,8 +37,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(ShadowstingSwordItem.class)
-public abstract class MixinShadowstingSword {
+public abstract class MixinShadowstingSword extends UniqueSwordItem {
 
+    public MixinShadowstingSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -101,23 +106,7 @@ public abstract class MixinShadowstingSword {
                 }
             }
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
@@ -182,7 +171,7 @@ public abstract class MixinShadowstingSword {
             }
 
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     @OnlyIn(Dist.CLIENT)

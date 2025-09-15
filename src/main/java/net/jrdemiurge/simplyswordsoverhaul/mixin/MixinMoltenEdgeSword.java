@@ -16,16 +16,19 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.MoltenEdgeSwordItem;
 import net.sweenus.simplyswords.registry.ItemsRegistry;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,9 +37,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(MoltenEdgeSwordItem.class)
-public abstract class MixinMoltenEdgeSword {
+public abstract class MixinMoltenEdgeSword extends UniqueSwordItem {
 
-    private static int stepMod = 0;
+    @Unique
+    private static int simply_Swords_Overhaul_1_20_1$stepMod = 0;
+
+    public MixinMoltenEdgeSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -49,23 +57,7 @@ public abstract class MixinMoltenEdgeSword {
             target.setSecondsOnFire(3);
             world.playSound(null, attacker, SoundRegistry.ELEMENTAL_BOW_FIRE_SHOOT_IMPACT_03.get(), attacker.getSoundSource(), 0.4F, 2.0F);
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     @Inject(method = "inventoryTick", at = @At("HEAD"), cancellable = true)
@@ -94,12 +86,12 @@ public abstract class MixinMoltenEdgeSword {
             }
         }
 
-        if (stepMod > 0) {
-            --stepMod;
+        if (simply_Swords_Overhaul_1_20_1$stepMod > 0) {
+            --simply_Swords_Overhaul_1_20_1$stepMod;
         }
 
-        if (stepMod <= 0) {
-            stepMod = 7;
+        if (simply_Swords_Overhaul_1_20_1$stepMod <= 0) {
+            simply_Swords_Overhaul_1_20_1$stepMod = 7;
         }
 
         Player player = (Player) entity;
@@ -111,8 +103,8 @@ public abstract class MixinMoltenEdgeSword {
         if (healthPercentage < 0.33) {
             particlePassive = ParticleTypes.LAVA;
         }
-        HelperMethods.createFootfalls(entity, stack, world, stepMod, particlePassive, particlePassive, particlePassive, true);
-        SimplySwordsAPI.inventoryTickGemSocketLogic(stack, world, entity, 50, 50);
+        HelperMethods.createFootfalls(entity, stack, world, simply_Swords_Overhaul_1_20_1$stepMod, particlePassive, particlePassive, particlePassive, true);
+        super.inventoryTick(stack, world, entity, slot, selected);
         ci.cancel();
     }
 
@@ -137,7 +129,7 @@ public abstract class MixinMoltenEdgeSword {
 
             user.getCooldowns().addCooldown((MoltenEdgeSwordItem) (Object) this, 4);
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
    @OnlyIn(Dist.CLIENT)

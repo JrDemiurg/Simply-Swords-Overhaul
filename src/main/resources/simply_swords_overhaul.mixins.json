@@ -10,10 +10,8 @@
   "mixins": [
     "MixinEmberlashSword",
     "MixinHelperMethods",
-    "MixinLivingEntity",
     "MixinMoltenEdgeSword",
     "MixinRendSword",
-    "MixinShadowstingSword",
     "MixinSimplySwordsAPI",
     "MixinSoulPyreSword",
     "MixinStarsEdgeSword",

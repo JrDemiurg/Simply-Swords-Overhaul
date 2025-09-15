@@ -3,6 +3,7 @@ package net.jrdemiurge.simplyswordsoverhaul.mixin;
 import net.jrdemiurge.simplyswordsoverhaul.Config;
 import net.jrdemiurge.simplyswordsoverhaul.scheduler.Scheduler;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -12,31 +13,46 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
+import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.WhisperwindSwordItem;
 import net.sweenus.simplyswords.registry.SoundRegistry;
 import net.sweenus.simplyswords.util.HelperMethods;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
+import java.util.*;
 
 @Mixin(WhisperwindSwordItem.class)
-public abstract class MixinWhisperwindSword {
+public abstract class MixinWhisperwindSword extends UniqueSwordItem {
+
+    @Unique
+    private static final String WHISPERWIND_DASHING = "SimplySwordsWhisperwindDashing";
+
+    @Unique
+    private static final String WHISPERWIND_MOB_KILLED = "SimplySwordsWhisperwindMobKilled";
+
+    @Unique
+    private static final Map<UUID, Set<UUID>> DASH_HIT_MAP = new HashMap<>();
+
+    public MixinWhisperwindSword(Tier toolMaterial, int attackDamage, float attackSpeed, Properties settings) {
+        super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
 
     @Inject(method = "hurtEnemy", at = @At("HEAD"), cancellable = true)
     public void modifyHurtEnemyMethod(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
@@ -51,23 +67,7 @@ public abstract class MixinWhisperwindSword {
                 player.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, 0);
             }
         }
-        cir.setReturnValue(hurtEnemyUniqueSword(stack, target, attacker));
-    }
-
-    public boolean hurtEnemyUniqueSword(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        if (!attacker.level().isClientSide()) {
-            HelperMethods.playHitSounds(attacker, target);
-            SimplySwordsAPI.postHitGemSocketLogic(stack, target, attacker);
-        }
-
-        return hurtEnemySword(stack, target, attacker);
-    }
-
-    public boolean hurtEnemySword(ItemStack pStack, LivingEntity pTarget, LivingEntity pAttacker) {
-        pStack.hurtAndBreak(1, pAttacker, (p_43296_) -> {
-            p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND);
-        });
-        return true;
+        cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
@@ -86,6 +86,27 @@ public abstract class MixinWhisperwindSword {
 
             int cooldown = Config.whisperwindCooldownTicks;
             double scale = Config.whisperwindDashDistance / 11D;
+
+            boolean isDashing = user.getPersistentData().getBoolean(WHISPERWIND_DASHING);
+            if (isDashing) {
+                user.getPersistentData().remove(WHISPERWIND_DASHING);
+                user.setDeltaMovement(Vec3.ZERO);
+                user.setNoGravity(false);
+                user.hurtMarked = true;
+                ((ServerPlayer) user).connection.send(new ClientboundSetEntityMotionPacket(user));
+                if (!user.getPersistentData().getBoolean(WHISPERWIND_MOB_KILLED)) {
+                    user.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, cooldown);
+                } else {
+                    user.getPersistentData().remove(WHISPERWIND_MOB_KILLED);
+                }
+                DASH_HIT_MAP.remove(user.getUUID());
+                cir.setReturnValue(super.use(world, user, hand));
+                return;
+            } else {
+                user.getPersistentData().putBoolean(WHISPERWIND_DASHING, true);
+            }
+
+            user.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, 2);
             world.playSound(null, user, SoundRegistry.ELEMENTAL_BOW_SCIFI_SHOOT_IMPACT_01.get(), user.getSoundSource(), 0.6F, 1.0F);
 
             Vec3 look = user.getLookAngle().normalize();
@@ -97,24 +118,38 @@ public abstract class MixinWhisperwindSword {
 
             int dashDuration = 7;
 
+            user.setNoGravity(true);
+            user.hurtMarked = true;
+
             for (int i = 0; i < dashDuration; i++) {
                 int delay = i * 2;
 
                 Scheduler.schedule(() -> {
+                    if (!user.getPersistentData().getBoolean(WHISPERWIND_DASHING)) return;
+
                     user.setDeltaMovement(finalLook);
                     ((ServerPlayer) user).connection.send(new ClientboundSetEntityMotionPacket(user));
 
-                    AABB area = user.getBoundingBox().inflate(1.5);
+                    UUID playerId = user.getUUID();
+                    Set<UUID> hitMobs = DASH_HIT_MAP.computeIfAbsent(playerId, k -> new HashSet<>());
+
+                    AABB area = user.getBoundingBox().inflate(2);
                     List<LivingEntity> nearbyMobs = world.getEntitiesOfClass(LivingEntity.class, area, entity -> entity != user);
 
                     for (LivingEntity mob : nearbyMobs) {
                         if (HelperMethods.checkFriendlyFire(mob, user)) {
 
+                            if (hitMobs.contains(mob.getUUID())) {
+                                continue;
+                            }
+
                             mob.hurt(user.damageSources().playerAttack(user), calculateDamage(user, mob));
+
+                            hitMobs.add(mob.getUUID());
 
                             if (mob.getHealth() == 0.0F) {
                                 user.level().playSound(null, user, SoundRegistry.MAGIC_SWORD_SPELL_02.get(), user.getSoundSource(), 0.3F, 1.8F);
-                                user.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, 0);
+                                user.getPersistentData().putBoolean(WHISPERWIND_MOB_KILLED, true);
                             }
                         }
                     }
@@ -136,13 +171,22 @@ public abstract class MixinWhisperwindSword {
             }
 
             Scheduler.schedule(() -> {
+                if (!user.getPersistentData().getBoolean(WHISPERWIND_DASHING)) return;
+                user.getPersistentData().remove(WHISPERWIND_DASHING);
                 user.setDeltaMovement(Vec3.ZERO);
+                user.setNoGravity(false);
+                user.hurtMarked = true;
                 ((ServerPlayer) user).connection.send(new ClientboundSetEntityMotionPacket(user));
+                if (!user.getPersistentData().getBoolean(WHISPERWIND_MOB_KILLED)) {
+                    user.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, cooldown);
+                } else {
+                    user.getPersistentData().remove(WHISPERWIND_MOB_KILLED);
+                }
+                DASH_HIT_MAP.remove(user.getUUID());
             }, dashDuration * 2, 0);
 
-            user.getCooldowns().addCooldown((WhisperwindSwordItem) (Object) this, cooldown);
         }
-        cir.setReturnValue(InteractionResultHolder.success(user.getItemInHand(hand)));
+        cir.setReturnValue(super.use(world, user, hand));
     }
 
     private static float calculateDamage(Player player, Entity target) {
@@ -180,10 +224,27 @@ public abstract class MixinWhisperwindSword {
 
         int cooldown = Config.whisperwindCooldownTicks;
         float floatCooldown = (float) cooldown / 20;
-        tooltip.add(Component.literal(" "));
-        tooltip.add(Component.translatable("tooltip.simply_swords_overhaul.cooldown", floatCooldown)
-                .withStyle(ChatFormatting.BLUE));
 
-        SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltip);
+
+        if (Screen.hasShiftDown()) {
+            tooltip.add(Component.translatable("tooltip.simply_swords_overhaul.whisperwinditem_1")
+                    .withStyle(ChatFormatting.GRAY));
+
+            tooltip.add(Component.literal(" "));
+            tooltip.add(Component.translatable("tooltip.simply_swords_overhaul.cooldown", floatCooldown)
+                    .withStyle(ChatFormatting.BLUE));
+        } else {
+            tooltip.add(Component.literal(" "));
+            tooltip.add(Component.translatable("tooltip.simply_swords_overhaul.cooldown", floatCooldown)
+                    .withStyle(ChatFormatting.BLUE));
+
+            SimplySwordsAPI.appendTooltipGemSocketLogic(itemStack, tooltip);
+
+            if (!tooltip.get(tooltip.size() - 1)
+                    .getString().equals(Component.translatable("item.simplyswords.common.showtooltip").getString())) {
+                tooltip.add(Component.literal(""));
+            }
+            tooltip.add(Component.translatable("tooltip.simply_swords_overhaul.shift"));
+        }
     }
 }
