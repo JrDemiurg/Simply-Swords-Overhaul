@@ -8,6 +8,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.WatcherSwordItem;
@@ -50,6 +52,7 @@ public abstract class MixinWatcherSword extends UniqueSwordItem {
         cir.setReturnValue(super.hurtEnemy(stack, target, attacker));
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
         if (!Config.enableWatcherChanges){

@@ -19,6 +19,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.sweenus.simplyswords.api.SimplySwordsAPI;
 import net.sweenus.simplyswords.item.UniqueSwordItem;
 import net.sweenus.simplyswords.item.custom.SoulPyreSwordItem;
@@ -117,6 +119,7 @@ public abstract class MixinSoulPyreSword extends UniqueSwordItem {
         cir.setReturnValue(super.use(world, user, hand));
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Inject(method = "appendHoverText", at = @At("HEAD"), cancellable = true)
     private void modifyTooltip(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag tooltipContext, CallbackInfo ci) {
         if (!Config.enableSoulPyreChanges){
